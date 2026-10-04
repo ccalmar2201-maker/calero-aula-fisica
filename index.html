@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factores de conversión y algo más</title>
+<style>
+:root{--ink:#1b2a49;--paper:#f3f7fb;--card:#fff;--sky:#dcecfb;--plum:#6d4bd1;--plum-d:#4f33a8;--ok:#1f9d7a;--okbg:#dff5ee;--bad:#c2410c;--badbg:#fde8dc;--sun:#ffd24a;--line:#cfdbe8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Roboto,sans-serif;font-size:19px;line-height:1.5}
+header{background:var(--ink);color:#fff;padding:16px 20px 0;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:1.4rem}
+header p{margin:0 0 8px;opacity:.8;font-size:.85rem}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{flex:0 0 auto;border:0;background:transparent;color:#cfd8ea;font:inherit;font-size:.9rem;padding:11px 14px;border-radius:12px 12px 0 0;cursor:pointer}
+nav button.on{background:var(--paper);color:var(--ink);font-weight:700}
+main{max-width:920px;margin:0 auto;padding:20px 16px 90px}
+section{display:none}section.on{display:block}
+h2{font-size:1.4rem;margin:.2em 0 .5em}
+h3{font-size:1.1rem;margin:1.2em 0 .4em;color:var(--plum-d)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 18px;margin:12px 0}
+.tip{background:var(--sky);border-left:6px solid var(--plum);border-radius:10px;padding:10px 16px;margin:12px 0}
+.warn{background:#fff6d6;border-left:6px solid var(--sun);border-radius:10px;padding:10px 16px;margin:12px 0}
+.chip{display:inline-block;font-size:.75rem;background:var(--plum);color:#fff;border-radius:999px;padding:2px 10px;margin-left:6px;vertical-align:middle}
+.chip.b{background:#2f6f9f}
+.big{font-size:1.2rem}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 4px}
+.frac span:first-child{border-bottom:2px solid var(--ink);padding:0 6px}
+.frac span:last-child{padding:0 6px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:1.15rem;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{border:2px solid var(--line);padding:7px 9px;text-align:center}th{background:var(--sky)}
+.ladder{display:flex;overflow-x:auto;gap:4px;padding:6px 0}
+.ladder div{flex:1 0 70px;text-align:center;border-radius:12px;padding:8px 4px;background:var(--card);border:2px solid var(--line)}
+.ladder b{display:block;font-size:1.25rem}.ladder small{display:block;opacity:.75;font-size:.76rem}
+.ladder .base{background:var(--sun);border-color:var(--sun)}
+.btn{font:inherit;font-size:1rem;border:0;border-radius:12px;padding:11px 18px;background:var(--plum);color:#fff;cursor:pointer;min-height:48px}
+.btn:active{background:var(--plum-d)}.btn.alt{background:#fff;color:var(--plum-d);border:2px solid var(--plum)}
+input.ans{font:inherit;font-size:1.1rem;width:140px;padding:9px 11px;border:2px solid var(--line);border-radius:10px;min-height:48px}
+input.ans.s{width:96px}
+input.ans:focus{outline:3px solid var(--plum);border-color:var(--plum)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.fb{margin-top:10px;padding:10px 14px;border-radius:10px;display:none}
+.fb.ok{display:block;background:var(--okbg);color:#0d5e47}.fb.bad{display:block;background:var(--badbg);color:var(--bad)}
+.steps{display:none;margin-top:10px;background:#f7f4ff;border-radius:10px;padding:10px 14px}.steps.on{display:block}
+.score{position:fixed;right:12px;bottom:12px;background:var(--ink);color:#fff;padding:9px 15px;border-radius:999px;font-size:.9rem;z-index:11}
+.u{white-space:nowrap}sup{font-size:.7em}
+svg text{font-family:inherit}
+a{color:var(--plum-d)}
+#niv{display:flex;gap:6px;padding:8px 0 4px}
+#niv button{flex:1;border:0;background:#2a3a5c;color:#cfd8ea;font:inherit;font-size:.82rem;padding:8px 6px;border-radius:10px;cursor:pointer}
+#niv button.on{background:var(--sun);color:var(--ink);font-weight:700}
+body.f2 .n34{display:none!important}
+body.f34 .n2{display:none!important}
+.match{display:flex;gap:14px;flex-wrap:wrap}
+.match .col{flex:1 1 180px;display:flex;flex-direction:column;gap:8px}
+.match button{text-align:left}
+.match button.sel{outline:3px solid var(--plum)}
+.match button.bad{outline:3px solid var(--bad)}
+.match button.done{background:var(--okbg);color:#0d5e47;border-color:var(--ok);pointer-events:none}
+.vf button{min-width:72px}
+.selu{font:inherit;font-size:1rem;padding:8px;border:2px solid var(--line);border-radius:10px;min-height:44px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Tema 0 · Factores de conversión y algo más</h1>
+  <p>Física y Química · <span class="chip">2º</span> contenido de 2º &nbsp;<span class="chip b">3º y 4º</span> ampliación</p>
+  <nav id="nav"></nav>
+  <div id="niv"></div>
+</header>
+<main>
+
+<!-- 0. CONCEPTOS INICIALES -->
+<section id="s0">
+  <h2>0. Conceptos iniciales <small style="font-weight:400">(libro pág. 10)</small></h2>
+  <h3>Producto y división de fracciones</h3>
+  <div class="card">
+    <p>Producto: <span class="frac"><span>a</span><span>b</span></span> · <span class="frac"><span>c</span><span>d</span></span> = <span class="frac"><span>a·c</span><span>b·d</span></span>
+      &nbsp;&nbsp; División: <span class="frac"><span>a</span><span>b</span></span> : <span class="frac"><span>c</span><span>d</span></span> = <span class="frac"><span>a·d</span><span>b·c</span></span></p>
+    <p style="font-size:.85rem;opacity:.8">(Recordatorio estándar: en los apuntes solo aparece el título.)</p>
+  </div>
+  <h3>Potencias</h3>
+  <div class="card">
+    <p>Sirven para escribir una multiplicación de varios números iguales de una manera más simplificada.</p>
+    <p class="big">5 · 5 · 5 · 5 = 5<sup>4</sup> &nbsp;(base 5, exponente 4)</p>
+    <p>En Física y Química utilizaremos principalmente potencias con <b>base 10</b>.</p>
+    <p class="big">100 000 = 10<sup>5</sup></p>
+  </div>
+  <div id="q-pot1"></div>
+  <h3>Operaciones con potencias</h3>
+  <div class="card">
+    <p class="big">Multiplicar → <b>sumas</b> exponentes: 10<sup>5</sup> · 10<sup>3</sup> = 10<sup>8</sup></p>
+    <p class="big">Dividir → <b>restas</b> exponentes: 10<sup>5</sup> : 10<sup>3</sup> = <span class="frac"><span>10<sup>5</sup></span><span>10<sup>3</sup></span></span> = 10<sup>2</sup></p>
+    <div class="tip"><b>Ojo con esto:</b> &nbsp;<span class="frac"><span>1</span><span>x</span></span> = x<sup>−1</sup>. Por ejemplo,
+      <span class="frac"><span>1</span><span>10<sup>3</sup></span></span> = 10<sup>−3</sup></div>
+  </div>
+  <div id="q-pot2"></div>
+  <h3>Recordatorio de la clase anterior</h3>
+  <div id="q-pot3"></div>
+</section>
+
+<!-- 1. CONVERSION -->
+<section id="s1">
+  <h2>1. Conversión de unidades</h2>
+  <h3>Tabla de conversión</h3>
+  <div class="ladder" id="ladder"></div>
+  <div class="card">
+    <table>
+      <tr><th>Prefijo</th><th>Símbolo</th><th>Vale</th></tr>
+      <tr><td>tera</td><td>T</td><td>10<sup>12</sup></td></tr>
+      <tr><td>giga</td><td>G</td><td>10<sup>9</sup></td></tr>
+      <tr><td>mega</td><td>M</td><td>10<sup>6</sup></td></tr>
+      <tr><td>kilo</td><td>k</td><td>10<sup>3</sup></td></tr>
+      <tr><td>hecto</td><td>h</td><td>10<sup>2</sup></td></tr>
+      <tr><td>deca</td><td>da</td><td>10<sup>1</sup></td></tr>
+      <tr><td>(unidad)</td><td></td><td>1</td></tr>
+      <tr><td>deci</td><td>d</td><td>10<sup>−1</sup></td></tr>
+      <tr><td>centi</td><td>c</td><td>10<sup>−2</sup></td></tr>
+      <tr><td>mili</td><td>m</td><td>10<sup>−3</sup></td></tr>
+      <tr><td>micro</td><td>µ</td><td>10<sup>−6</sup></td></tr>
+      <tr><td>nano</td><td>n</td><td>10<sup>−9</sup></td></tr>
+      <tr><td>pico</td><td>p</td><td>10<sup>−12</sup></td></tr>
+    </table>
+    <p style="font-size:.85rem;opacity:.8">Los prefijos T, G, M, µ, n y p se usan en los ejercicios de los apuntes (TJ, pJ, Gl, ng).</p>
+  </div>
+
+  <h3>1.1. Unidad a cambiar en el numerador (y si hubiera en denominador)</h3>
+  <div class="card"><ol>
+    <li>Pongo el <b>dato</b> que dan.</li>
+    <li>Colocamos la unidad que <b>buscamos</b>, <u>arriba</u>.</li>
+    <li>Colocamos la unidad que <b>no queremos</b>, en el <u>lado contrario</u>.</li>
+    <li>A la unidad <b>grande</b> se le pone un <b>1</b>; a la otra, la del <b>prefijo</b>.</li>
+    <li>Si hubiera unidad en el denominador, proceder <b>al revés</b> en 2, 3 y 4.</li></ol>
+    <p class="big">Ejemplo: 3570 hl a L</p>
+    <div class="chain">3570 hl · <span class="frac"><span>10<sup>2</sup> L</span><span>1 hl</span></span> = 357 000 L</div>
+  </div>
+  <p><b>Ejercicios con una unidad:</b></p><div id="q-uni1"></div>
+  <p><b>Ejercicios con dos unidades:</b> (la que hay arriba y la de abajo; se hace un factor para cada una)</p><div id="q-uni2"></div>
+
+  <h3 class="n34">1.2. Unidades con exponente <span class="chip b">3º y 4º</span></h3>
+  <div class="card n34"><ol>
+    <li>Se coloca el dato inicial.</li>
+    <li>Colocamos la unidad que buscamos, arriba.</li>
+    <li>Colocamos la unidad que no queremos, en el lado contrario.</li>
+    <li>Colocar el <b>exponente de la unidad</b> al numerador y al denominador (todo el factor se eleva).</li></ol>
+    <div class="chain">5 m<sup>2</sup> · <span class="frac"><span>(10<sup>2</sup> cm)<sup>2</sup></span><span>(1 m)<sup>2</sup></span></span> = 5·10<sup>4</sup> cm<sup>2</sup></div>
+  </div>
+  <p class="n34"><b>Ejercicios con exponente en numerador y denominador:</b></p><div id="q-exp" class="n34"></div>
+
+  <h3>1.3. Saltos más allá de la unidad</h3>
+  <div class="card"><p>En ejercicios que <b>no piden Sistema Internacional</b>: «contar escalones» en la misma tabla.
+    Cada escalón a la derecha = ×10; a la izquierda = ÷10 (y con exponente: ×10<sup>2</sup> o ×10<sup>3</sup> por escalón, según la potencia).</p></div>
+  <div id="q-saltos"></div>
+
+  <h3>1.4. Otras conversiones</h3>
+  <div class="card">
+    <p><b>Velocidad</b> <span class="chip">2º</span> y <b>densidad</b> <span class="chip b">3º y 4º</span></p>
+    <div class="chain">36 <span class="frac"><span>km</span><span>h</span></span> · <span class="frac"><span>10<sup>3</sup> m</span><span>1 km</span></span> · <span class="frac"><span>1 h</span><span>3600 s</span></span> = 10 m/s</div>
+    <div class="tip">Atajo: de km/h a m/s ÷ 3,6. De m/s a km/h × 3,6.</div>
+    <div class="warn"><b>Volumen:</b> espacio que ocupa un objeto (m³).<br><b>Capacidad:</b> volumen que puede contener, como máximo (L).<br><b>1 L = 1 dm³</b> &nbsp;·&nbsp; 1 mL = 1 cm³ &nbsp;·&nbsp; 1 m³ = 1000 L</div>
+  </div>
+  <div id="q-otras"></div>
+</section>
+
+<!-- 2. CAMBIOS DE ESTADO -->
+<section id="s2">
+  <h2>2. Cambios de estado <span class="chip">2º</span></h2>
+  <div class="warn">✍️ <b>Sección en preparación.</b> Aquí irán los cambios de estado (fusión, vaporización, condensación, solidificación y sublimación). En cuanto me pases el contenido, lo añado con sus esquemas y ejercicios.</div>
+</section>
+
+<!-- 3. NOTACION CIENTIFICA -->
+<section id="s3" class="n34">
+  <h2>3. Notación científica <span class="chip b">3º y 4º</span></h2>
+  <div class="card">
+    <p>Se debe expresar con <b>UN número entero (entre 1 y 9)</b> y luego la parte decimal, separada por una coma. A continuación, se escribe la <b>potencia de base 10</b>.</p>
+    <p class="big">Ejemplo: 4,12 · 10<sup>n</sup></p>
+    <p>Escribe tus respuestas en dos casillas: <b>número</b> y <b>exponente</b>.</p>
+  </div>
+  <div id="q-sci"></div>
+
+  <h3>Operaciones con potencias de 10</h3>
+  <div class="card"><p>Multiplicas los números y sumas exponentes; dividir: divides los números y restas exponentes. Después, deja el resultado en notación científica.</p>
+    <p><a href="https://www.orbitalesmoleculares.com/notacion-cientifica/" target="_blank" rel="noopener">Enlace del profesor: notación científica</a> (necesita internet)</p></div>
+  <div id="q-ops"></div>
+
+  <h3>Cálculos con potencias con la calculadora</h3>
+  <div class="card">
+    <p>Repite en la calculadora los ejemplos anteriores. En la mayoría de calculadoras científicas:</p>
+    <ul><li>El botón <b>×10<sup>x</sup></b> (o <b>EXP</b>) escribe «·10 elevado a…». Ejemplo: 6 ×10<sup>x</sup> 3 → 6·10<sup>3</sup>.</li>
+      <li>El botón <b>(−)</b> sirve para el signo menos del número o del exponente.</li>
+      <li>El botón <b>x<sup>2</sup></b>, <b>x<sup>▢</sup></b> o <b>^</b> para elevar a una potencia.</li></ul>
+    <p style="font-size:.85rem;opacity:.8">Los apuntes dicen «poner botones de la calcu en pizarra» sin detalle; esta es una nota genérica. Los nombres cambian según el modelo.</p>
+  </div>
+</section>
+
+<!-- 4. CIFRAS -->
+<section id="s4" class="n34">
+  <h2>4. Cifras significativas y redondeo <span class="chip b">3º y 4º</span></h2>
+  <div class="card">
+    <p>Reglas habituales (los apuntes dicen «copiar reglas» del enlace del profesor, revísalas con él):</p>
+    <ul><li>Todo dígito distinto de cero es significativo.</li>
+      <li>Los ceros <b>entre</b> dígitos distintos de cero sí cuentan (306 → 3 cifras).</li>
+      <li>Los ceros a la <b>izquierda</b> no cuentan (0,00043 → 2 cifras).</li>
+      <li>Los ceros finales <b>detrás de la coma</b> sí cuentan (70,00 → 4 cifras).</li>
+      <li>En un número entero como 300, los ceros finales son ambiguos; con notación científica se aclara (3·10<sup>2</sup> → 1 cifra, 3,00·10<sup>2</sup> → 3 cifras).</li></ul>
+    <p><a href="https://www.learningaboutelectronics.com/Articulos/Calculadora-de-cifras-significativas.php" target="_blank" rel="noopener">Calculadora de cifras significativas</a> (necesita internet)</p>
+  </div>
+  <h3>¿Cuántas cifras significativas tiene?</h3>
+  <div id="q-cs"></div>
+  <h3>Ejercicios finales (con cifras significativas)</h3>
+  <div id="q-fin"></div>
+</section>
+
+<!-- 5. GRAFICA -->
+<section id="s5">
+  <h2>5. Construcción de una gráfica a partir de una tabla</h2>
+  <div class="card">
+    <p><b>Elongación de un muelle frente a fuerza</b></p>
+    <table><tr><th>F (eje y)</th><td>0</td><td>2</td><td>4</td><td>6</td><td>8</td></tr>
+    <tr><th>Elongación (eje x, cm)</th><td>0</td><td>4</td><td>8</td><td>12</td><td>30</td></tr></table>
+  </div>
+  <h3>a) Representa</h3>
+  <div class="row"><button class="btn" id="g1">1. Ejes</button><button class="btn" id="g2">2. Marcar puntos</button>
+    <button class="btn" id="g3">3. Recta del tramo inicial</button><button class="btn" id="g4">4. Unir el último punto</button>
+    <button class="btn alt" id="g0">Borrar</button></div>
+  <div class="card" style="padding:6px"><svg id="graf" viewBox="0 0 560 380" style="width:100%;height:auto"></svg></div>
+  <h3>b) ¿Qué fuerza hay que aplicar para elongar el muelle 5 cm?</h3>
+  <div id="q-gb"></div>
+  <h3>c) Analiza qué ha pasado en el tramo final</h3>
+  <div class="card" id="gc"></div>
+</section>
+
+<!-- A. ACTIVIDADES -->
+<section id="sA">
+  <h2>🎮 Actividades interactivas</h2>
+  <p>De lo más sencillo a lo más completo. ¡Suma aciertos!</p>
+
+  <h3>1 · La escalera viva</h3>
+  <div class="card">
+    <p>Escribe un número, elige <b>desde</b> qué unidad y <b>a</b> cuál. Mira el salto al instante.</p>
+    <div class="row">
+      <input class="ans s" id="ev-n" inputmode="decimal" value="5">
+      <select class="selu" id="ev-from"></select>
+      <span>➜</span>
+      <select class="selu" id="ev-to"></select>
+    </div>
+    <div class="fb ok" id="ev-out" style="display:block"></div>
+  </div>
+
+  <h3>2 · Verdadero o falso</h3>
+  <div class="card vf" id="vf"></div>
+
+  <h3>3 · Emparejar cantidades iguales</h3>
+  <div class="card"><p>Pulsa una de la izquierda y su igual de la derecha.</p><div class="match" id="match"></div><div class="fb" id="match-fb"></div></div>
+
+  <div class="tip">Vienen más: <b>constructor de factores</b>, <b>reto cronometrado</b> y <b>problemas con enunciado</b>. Dime si estas tres te convencen y sigo con las siguientes.</div>
+</section>
+
+<!-- 6. GIMNASIO -->
+<section id="s6">
+  <h2>Gimnasio de conversiones</h2>
+  <p>Ejercicios al azar con prefijos. Usa coma o punto para los decimales.</p>
+  <div class="card" id="gym"></div>
+</section>
+
+<!-- 7. PENDIENTE -->
+<section id="s7">
+  <h2>Qué no estaba desarrollado en los apuntes</h2>
+  <div class="card"><ul>
+    <li><b>Cambios de estado (2º)</b>: solo el título.</li>
+    <li><b>Ecuaciones de 2º grado (4º)</b>: solo una mención («En 4º ecuaciones de 2º grado»). Sin contenido.</li>
+    <li><b>Reglas de cifras significativas</b>: el apunte dice «copiar reglas»; puse las estándar.</li>
+    <li><b>Ejercicio «con X cifras significativas»</b>: el apunte no da X; en los ejercicios finales he usado las cifras de los datos.</li>
+    <li><b>«1/266·10<sup>−4</sup>»</b> y <b>«6·10<sup>3</sup> ÷ 3·10<sup>4</sup>»</b> se pueden leer de varias formas. He interpretado: (1/266)·10<sup>−4</sup> y (6·10<sup>3</sup>)/(3·10<sup>4</sup>).</li>
+    <li><b>Unidades de la fuerza</b> en la tabla del muelle: no se indican.</li>
+    <li>No incluido a propósito: notas de organización del profesor (libro, Canva/Genially/PowerPoint, «no borrar pizarra», quién resuelve cada ejercicio).</li>
+  </ul></div>
+</section>
+</main>
+<div class="score" id="score">Aciertos: 0</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let aciertos=0,hechos=new Set();
+const tabs=[["s0","0 Inicio",""],["s1","1 Conversión",""],["s2","2 Cambios de estado",""],["s3","3 Not. científica","34"],["s4","4 Cifras sig.","34"],["s5","5 Gráfica",""],["sA","🎮 Actividades",""],["s6","Gimnasio",""],["s7","Pendiente",""]];
+const nav=$("#nav");
+tabs.forEach(([id,t,lvl])=>{const b=document.createElement("button");b.innerHTML=t;b.dataset.id=id;b.dataset.lvl=lvl||"";b.onclick=()=>show(id);nav.appendChild(b);});
+function show(id){const btn=nav.querySelector('button[data-id="'+id+'"]');if(btn&&btn.style.display==="none")id="s0";
+  document.querySelectorAll("main > section").forEach(s=>s.classList.toggle("on",s.id===id));
+  nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.id===id));window.scrollTo(0,0);}
+/* filtro de nivel */
+let nivel="all";const niv=$("#niv");
+[["all","Todo"],["2","Solo 2º"],["34","Solo 3º/4º"]].forEach(([n,t])=>{const b=document.createElement("button");b.textContent=t;b.dataset.n=n;b.onclick=()=>setNivel(n);niv.appendChild(b);});
+function setNivel(n){nivel=n;
+  document.body.classList.remove("f2","f34","fall");
+  document.body.classList.add(n==="2"?"f2":n==="34"?"f34":"fall");
+  niv.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.n===n));
+  nav.querySelectorAll("button[data-id]").forEach(b=>{const l=b.dataset.lvl;
+    b.style.display=((n==="2"&&l==="34")||(n==="34"&&l==="2"))?"none":"";});
+  const cur=nav.querySelector("button.on");if(cur&&cur.style.display==="none")show("s0");}
+setNivel("all");
+show("s0");
+
+function num(t){return parseFloat(String(t).trim().replace(/\s/g,"").replace(",","."));}
+function fmt(x){return String(Number(x.toPrecision(10))).replace(".",",");}
+function close(a,b,tol=1e-6){return Math.abs(a-b)<=Math.abs(b)*tol+1e-15;}
+function sumar(k){if(!hechos.has(k)){hechos.add(k);aciertos++;$("#score").textContent="Aciertos: "+aciertos;}}
+
+/* item: {q, ans, unit, steps} (numérico)  |  {q, two:true, m, e, tol, unit, steps} (mantisa y exponente) */
+function makeQ(box,item,key){
+  const d=document.createElement("div");d.className="card"+(item.lvl==="34"?" n34":item.lvl==="2"?" n2":"");
+  const inputs=item.two
+   ?`<input class="ans s" inputmode="decimal" autocomplete="off" placeholder="número"> <span class="u">· 10</span><sup><input class="ans s" style="width:70px;min-height:36px" inputmode="numeric" autocomplete="off" placeholder="exp."></sup> <span class="u">${item.unit||""}</span>`
+   :`<input class="ans" inputmode="decimal" autocomplete="off" placeholder="resultado"> <span class="u">${item.unit||""}</span>`;
+  d.innerHTML=`<div class="big">${item.q}</div><div class="row">${inputs}<button class="btn ck">Comprobar</button>${item.steps?'<button class="btn alt st">Ver pasos</button>':''}</div><div class="fb"></div>${item.steps?`<div class="steps">${item.steps}</div>`:''}`;
+  const ins=d.querySelectorAll("input"),fb=d.querySelector(".fb");
+  const ok=()=>{fb.className="fb ok";fb.textContent="¡Correcto!";sumar(key);};
+  const bad=t=>{fb.className="fb bad";fb.textContent=t;};
+  const check=()=>{
+    if(item.two){
+      const m=num(ins[0].value),e=num(ins[1].value||"0");
+      if(isNaN(m)||isNaN(e)){return bad("Rellena el número y el exponente (si es 0, escribe 0).");}
+      const val=m*Math.pow(10,e),goal=item.m*Math.pow(10,item.e);
+      if(!close(val,goal,item.tol||1e-6))return bad("Todavía no. Revisa los escalones o pulsa «Ver pasos».");
+      if(item.norm!==false && !(Math.abs(m)>=1&&Math.abs(m)<10))return bad("El valor está bien, pero no es notación científica: el número debe estar entre 1 y 9,99…");
+      if(e!==item.e)return bad("El valor está bien, pero el exponente esperado es "+item.e+".");
+      ok();
+    }else{
+      const v=num(ins[0].value);
+      if(isNaN(v))return bad("Escribe un número.");
+      close(v,item.ans)?ok():bad("Todavía no. Revisa los escalones o pulsa «Ver pasos».");
+    }};
+  d.querySelector(".ck").onclick=check;
+  ins.forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")check();}));
+  const st=d.querySelector(".st");if(st)st.onclick=()=>d.querySelector(".steps").classList.toggle("on");
+  box.appendChild(d);
+}
+function fill(id,list,pre){list.forEach((it,i)=>makeQ($(id),it,pre+i));}
+
+/* escalera */
+const P=[["T",12],["G",9],["M",6],["k",3],["h",2],["da",1],["",0],["d",-1],["c",-2],["m",-3],["µ",-6],["n",-9],["p",-12]];
+$("#ladder").innerHTML=P.map(p=>`<div class="${p[1]===0?'base':''}"><b>${p[0]||"1"}</b><small>10<sup>${p[1]}</sup></small></div>`).join("");
+
+/* 0 potencias */
+fill("#q-pot1",[
+ {q:"2000 = 2 · 10<sup>n</sup>. ¿Cuánto vale n?",ans:3,steps:"2000 = 2 · 1000 = 2 · 10³"},
+ {q:"0,001 = 10<sup>n</sup>. ¿Cuánto vale n?",ans:-3,steps:"0,001 = 1/1000 = 1/10³ = 10⁻³"},
+ {q:"0,0005 = 5 · 10<sup>n</sup>. ¿Cuánto vale n?",ans:-4,steps:"0,0005 = 5/10000 = 5 · 10⁻⁴"}],"p1");
+fill("#q-pot2",[
+ {q:"10<sup>5</sup> · 10<sup>3</sup> = 10<sup>n</sup>. n = ?",ans:8,steps:"5 + 3 = 8"},
+ {q:"4 · 10<sup>7</sup> · 10<sup>2</sup> = 4 · 10<sup>n</sup>. n = ?",ans:9,steps:"7 + 2 = 9"},
+ {q:"4 · 10<sup>−2</sup> · 10<sup>3</sup> = 4 · 10<sup>n</sup>. n = ?",ans:1,steps:"−2 + 3 = 1"},
+ {q:"10<sup>5</sup> : 10<sup>3</sup> = 10<sup>n</sup>. n = ?",ans:2,steps:"5 − 3 = 2. También: 10⁵/10³ = 10²"}],"p2");
+fill("#q-pot3",[
+ {q:"(4·10<sup>3</sup>) / (2·10<sup>2</sup>) = ? · 10<sup>1</sup>. ¿Qué número va delante?",ans:2,steps:"4/2 = 2 y 10³/10² = 10¹ → 2·10¹ = 20"}],"p3");
+
+/* 1.1 una unidad */
+fill("#q-uni1",[
+ {q:"3 570 hl a L",unit:"L",ans:357000,steps:"3570 hl · (10² L / 1 hl) = 357 000 L"},
+ {q:"3 km a m",unit:"m",ans:3000,steps:"3 km · (10³ m / 1 km) = 3000 m"},
+ {q:"450 g a kg",unit:"kg",ans:0.45,steps:"450 g · (1 kg / 10³ g) = 0,45 kg"},
+ {q:"2,5 L a mL",unit:"mL",ans:2500,steps:"2,5 L · (10³ mL / 1 L) = 2500 mL"},
+ {q:"8,5 cm a m",unit:"m",ans:0.085,steps:"8,5 cm · (1 m / 10² cm) = 0,085 m"}],"u1");
+/* 1.1 dos unidades */
+fill("#q-uni2",[
+ {q:"36 km/h a m/s",unit:"m/s",ans:10,steps:"36 · (10³ m/1 km) · (1 h/3600 s) = 36000/3600 = 10"},
+ {q:"72 km/h a m/s",unit:"m/s",ans:20,steps:"72 ÷ 3,6 = 20"},
+ {q:"15 m/s a km/h",unit:"km/h",ans:54,steps:"15 · (1 km/10³ m) · (3600 s/1 h) = 54"},
+ {q:"90 km/h a m/s",unit:"m/s",ans:25,steps:"90 ÷ 3,6 = 25"}],"u2");
+/* 1.2 exponente */
+fill("#q-exp",[
+ {q:"5 m² a cm²",unit:"cm²",ans:50000,steps:"5 · (10² cm)²/(1 m)² = 5 · 10⁴ cm²"},
+ {q:"1,2 km² a m²",unit:"m²",ans:1200000,steps:"1,2 · (10³ m)²/(1 km)² = 1,2 · 10⁶"},
+ {q:"3 m³ a L",unit:"L",ans:3000,steps:"1 m³ = 1000 dm³ = 1000 L → 3000 L"},
+ {q:"2 500 cm³ a L",unit:"L",ans:2.5,steps:"1 L = 1 dm³ = 1000 cm³ → 2500/1000 = 2,5 L"},
+ {q:"0,4 dm³ a mL",unit:"mL",ans:400,steps:"1 dm³ = 1 L = 1000 mL → 400 mL"},
+ {q:"0,75 m³ a L",unit:"L",ans:750,steps:"0,75 · 1000 = 750 L"},
+ {q:"12 000 cm² a m²",unit:"m²",ans:1.2,steps:"1 m² = 10 000 cm² → 1,2 m²"}],"ex");
+/* 1.3 saltos */
+fill("#q-saltos",[
+ {q:"11 mg a ng",unit:"ng",ans:11e6,steps:"mg → g: ÷10³. g → ng: ×10⁹. Total ×10⁶ (6 escalones a la derecha): 11 · 10⁶ = 1,1 · 10⁷ ng"},
+ {q:"11·10<sup>−1</sup> TJ/mm a pJ/hm",two:true,m:1.1,e:29,unit:"pJ/hm",
+  steps:"TJ → pJ: 10¹² / 10⁻¹² = 10²⁴.<br>mm → hm (en el denominador, al revés): 1 hm = 10⁵ mm → ×10⁵.<br>Total: 1,1 · 10²⁴ · 10⁵ = 1,1 · 10²⁹ pJ/hm"}],"sa");
+/* 1.4 otras */
+fill("#q-otras",[
+ {q:"36 km/h a m/s",unit:"m/s",ans:10,steps:"Mira el ejemplo de arriba."},
+ {q:"20 g/L a kg/cm³ <span class='chip b'>3º y 4º</span>",two:true,m:2,e:-5,unit:"kg/cm³",lvl:"34",
+  steps:"g → kg: ×10⁻³. L → cm³ (denominador, al revés): 1 L = 10³ cm³ → ÷10³.<br>20 · 10⁻³ / 10³ = 20 · 10⁻⁶ = 2 · 10⁻⁵ kg/cm³"},
+ {q:"750 mL a cm³",unit:"cm³",ans:750,steps:"1 mL = 1 cm³: el número no cambia."}],"ot");
+
+/* 3 notación científica */
+fill("#q-sci",[
+ {q:"6000 en notación científica",two:true,m:6,e:3,steps:"6000 = 6 · 10³"},
+ {q:"6321 en notación científica",two:true,m:6.321,e:3,steps:"6321 = 6,321 · 10³ (la coma se coloca tras el primer dígito: 3 saltos)"},
+ {q:"0,00043 en notación científica",two:true,m:4.3,e:-4,steps:"La coma salta 4 lugares a la derecha → exponente negativo: 4,3 · 10⁻⁴"},
+ {q:"(1/266) · 10<sup>−4</sup> en notación científica (3 decimales basta)",two:true,m:3.759,e:-7,tol:1e-3,
+  steps:"1/266 = 0,003759… = 3,759 · 10⁻³. Después: 3,759 · 10⁻³ · 10⁻⁴ = 3,759 · 10⁻⁷"}],"sc");
+fill("#q-ops",[
+ {q:"6·10<sup>3</sup> · 5·10<sup>4</sup>",two:true,m:3,e:8,steps:"6·5 = 30; 10³·10⁴ = 10⁷ → 30·10⁷ = 3·10⁸ (hay que normalizar)"},
+ {q:"−6·10<sup>3</sup> · 5·10<sup>−4</sup>",two:true,m:-3,e:0,steps:"−6·5 = −30; 3 + (−4) = −1 → −30·10⁻¹ = −3·10⁰ = −3"},
+ {q:"(6·10<sup>3</sup>) ÷ (3·10<sup>4</sup>)",two:true,m:2,e:-1,steps:"6/3 = 2; 3 − 4 = −1 → 2·10⁻¹ = 0,2"},
+ {q:"(4·10<sup>3</sup>) / (2·10<sup>2</sup>)",two:true,m:2,e:1,steps:"4/2 = 2; 3 − 2 = 1 → 2·10¹ = 20"},
+ {q:"4·10<sup>−2</sup> · 10<sup>3</sup>",two:true,m:4,e:1,steps:"−2 + 3 = 1 → 4·10¹ = 40"}],"op");
+
+/* 4 cifras */
+fill("#q-cs",[
+ {q:"3,35 → ¿cuántas cifras significativas?",ans:3},
+ {q:"306 → ¿cuántas?",ans:3,steps:"El 0 está entre dos dígitos no nulos: cuenta."},
+ {q:"8,03 → ¿cuántas?",ans:3},
+ {q:"70,2 → ¿cuántas?",ans:3},
+ {q:"70,02 → ¿cuántas?",ans:4},
+ {q:"70,00 → ¿cuántas?",ans:4,steps:"Los ceros finales tras la coma sí cuentan."},
+ {q:"300 → ¿cuántas? (la regla básica: ceros finales sin coma no cuentan)",ans:1,steps:"Es ambiguo. Con la regla básica, 1 cifra; 3,00·10² tendría 3."}],"cs");
+fill("#q-fin",[
+ {q:"A. Convierte 3570 hl al S.I. y exprésalo con las cifras significativas que corresponda (3570 tiene 4)",two:true,m:3.57,e:5,unit:"L",
+  steps:"3570 hl = 357 000 L. Con 4 cifras: 3,570 · 10⁵ L. (3,57 y 3,570 valen igual; escribe 3,570 si te piden 4 cifras.)"},
+ {q:"B. 0,090990 Gl/ms a mL/ds (5 cifras significativas: 0,090990 tiene 5)",two:true,m:9.099,e:12,unit:"mL/ds",
+  steps:"Gl → mL: 1 Gl = 10⁹ L = 10¹² mL → ×10¹².<br>ms → ds, en el denominador (al revés): 1 ms = 10⁻² ds, así que dividir entre 10⁻² = ×10².<br>Total: 0,090990 · 10¹² · 10² = 0,090990 · 10¹⁴ = 9,0990 · 10¹² mL/ds"}],"fn");
+</script>
+<script>
+/* ---------- Gráfica del muelle ---------- */
+(function(){
+  const svg=$("#graf"),X0=60,Y0=330,W=480,H=310,sx=x=>X0+x/32*W,sy=y=>Y0-y/8*H;
+  const pts=[[0,0],[4,2],[8,4],[12,6],[30,8]];
+  const ns="http://www.w3.org/2000/svg";
+  let stage=0;
+  const add=(t,a,txt)=>{const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;svg.appendChild(e);return e;};
+  function draw(){
+    svg.innerHTML="";
+    if(stage>=1){
+      for(let x=0;x<=32;x+=4){add("line",{x1:sx(x),y1:Y0,x2:sx(x),y2:20,stroke:"#e3ebf3"});add("text",{x:sx(x),y:Y0+20,"text-anchor":"middle","font-size":13},x);}
+      for(let y=0;y<=8;y+=2){add("line",{x1:X0,y1:sy(y),x2:X0+W,y2:sy(y),stroke:"#e3ebf3"});add("text",{x:X0-10,y:sy(y)+4,"text-anchor":"end","font-size":13},y);}
+      add("line",{x1:X0,y1:Y0,x2:X0+W+10,y2:Y0,stroke:"#1b2a49","stroke-width":2});
+      add("line",{x1:X0,y1:Y0,x2:X0,y2:12,stroke:"#1b2a49","stroke-width":2});
+      add("text",{x:X0+W/2,y:372,"text-anchor":"middle","font-size":14},"Elongación (cm)");
+      add("text",{x:16,y:Y0-H/2,"text-anchor":"middle","font-size":14,transform:`rotate(-90 16 ${Y0-H/2})`},"Fuerza F");
+    }
+    if(stage>=3)add("line",{x1:sx(0),y1:sy(0),x2:sx(12),y2:sy(6),stroke:"#6d4bd1","stroke-width":3});
+    if(stage>=4)add("line",{x1:sx(12),y1:sy(6),x2:sx(30),y2:sy(8),stroke:"#c2410c","stroke-width":3,"stroke-dasharray":"6 4"});
+    if(stage>=2)pts.forEach(p=>{add("circle",{cx:sx(p[0]),cy:sy(p[1]),r:6,fill:"#1b2a49"});add("text",{x:sx(p[0])+9,y:sy(p[1])-9,"font-size":12},"("+p[0]+", "+p[1]+")");});
+  }
+  [["#g1",1],["#g2",2],["#g3",3],["#g4",4],["#g0",0]].forEach(([id,n])=>$(id).onclick=()=>{stage=n;draw();});
+  draw();
+  makeQ($("#q-gb"),{q:"Mira el tramo recto (los 4 primeros puntos): ¿cuánta fuerza F corresponde a 5 cm?",ans:2.5,unit:"(unidades de F)",
+    steps:"En el tramo recto, cada 4 cm de elongación se necesitan 2 unidades de fuerza → 0,5 por cm. 5 cm · 0,5 = 2,5."},"gb");
+  const gc=$("#gc");
+  gc.innerHTML='<p>Elige la explicación correcta:</p><div class="row"></div><div class="fb"></div>';
+  const fb=gc.querySelector(".fb"),row=gc.querySelector(".row");
+  [["Hasta F = 6 el muelle se estira de forma proporcional; después se estira mucho más (de 12 a 30 cm) con solo 2 más de fuerza: se ha deformado y ya no cumple la proporcionalidad.",true],
+   ["El muelle sigue estirándose igual que al principio.",false],
+   ["Se ha equivocado quien midió: la gráfica siempre es una recta.",false]].forEach(([t,c])=>{
+     const b=document.createElement("button");b.className="btn alt";b.style.textAlign="left";b.textContent=t;
+     b.onclick=()=>{if(c){fb.className="fb ok";fb.textContent="¡Correcto! Al principio hay proporcionalidad (recta). En el tramo final la gráfica se dobla.";sumar("gc");}else{fb.className="fb bad";fb.textContent="No. Compara la pendiente de los dos tramos.";}};
+     row.appendChild(b);row.style.flexDirection="column";row.style.alignItems="stretch";});
+})();
+
+/* ---------- Gimnasio ---------- */
+(function(){
+  const bases=["m","g","L"],pref=[["k",3],["h",2],["da",1],["",0],["d",-1],["c",-2],["m",-3]],vals=[2,3,4.5,7,12,25,40,250];
+  let n=0;
+  function nuevo(){
+    const b=bases[Math.floor(Math.random()*3)];let a,c;
+    do{a=pref[Math.floor(Math.random()*7)];c=pref[Math.floor(Math.random()*7)];}while(a[1]===c[1]);
+    const v=vals[Math.floor(Math.random()*vals.length)],from=a[0]+b,to=c[0]+b,k=a[1]-c[1],ans=v*Math.pow(10,k);
+    const dir=k>0?`${k} escalón(es) a la derecha → ×10<sup>${k}</sup>`:`${-k} escalón(es) a la izquierda → ÷10<sup>${-k}</sup>`;
+    const box=$("#gym");box.innerHTML="";n++;
+    makeQ(box,{q:`Pasa <b>${fmt(v)} ${from}</b> a <b>${to}</b>`,ans:ans,unit:to,steps:`De «${a[0]||"unidad"}» a «${c[0]||"unidad"}»: ${dir}.<br>${fmt(v)} ${from} = ${fmt(ans)} ${to}`},"gym"+n);
+    const inner=box.firstChild;inner.style.cssText="border:0;padding:0;margin:0";
+    const r=document.createElement("div");r.className="row";r.innerHTML='<button class="btn alt">Otro ejercicio</button>';r.firstChild.onclick=nuevo;box.appendChild(r);
+  }
+  nuevo();
+})();
+</script>
+<script>
+/* ---------- Actividades ---------- */
+(function(){
+  const PR=[["km",3],["hm",2],["dam",1],["m",0],["dm",-1],["cm",-2],["mm",-3]];
+  /* 1 · escalera viva */
+  const from=$("#ev-from"),to=$("#ev-to"),out=$("#ev-out"),nInp=$("#ev-n");
+  PR.forEach((p,i)=>{from.add(new Option(p[0],i));to.add(new Option(p[0],i));});
+  from.value=0;to.value=3;
+  function ev(){
+    const v=num(nInp.value),a=PR[+from.value],b=PR[+to.value];
+    if(isNaN(v)){out.className="fb bad";out.textContent="Escribe un número.";return;}
+    const k=a[1]-b[1],r=v*Math.pow(10,k);
+    const dir=k===0?"es la misma unidad":(k>0?`${k} escalón(es) a la derecha → ×10^${k}`:`${-k} escalón(es) a la izquierda → ÷10^${-k}`);
+    out.className="fb ok";out.innerHTML=`${fmt(v)} ${a[0]} = <b>${fmt(r)} ${b[0]}</b> &nbsp;(${dir})`;
+  }
+  [from,to,nInp].forEach(e=>e.addEventListener("input",ev));ev();
+
+  /* 2 · verdadero/falso */
+  const VF=[["3 km = 3000 m",true],["500 g = 5 kg",false],["2 L = 2000 mL",true],["1 m = 10 cm",false],["250 cm = 2,5 m",true],["4000 mg = 4 g",true]];
+  const vf=$("#vf");
+  VF.forEach((q,i)=>{
+    const d=document.createElement("div");d.style.margin="12px 0";
+    d.innerHTML=`<div class="big">${q[0]}</div><div class="row"><button class="btn alt">Verdadero</button><button class="btn alt">Falso</button></div><div class="fb"></div>`;
+    const bs=d.querySelectorAll("button"),f=d.querySelector(".fb");
+    bs.forEach((b,bi)=>b.onclick=()=>{const ok=(bi===0)===q[1];f.className="fb "+(ok?"ok":"bad");f.textContent=ok?"¡Bien!":"No. Piensa en los escalones.";if(ok)sumar("vf"+i);});
+    vf.appendChild(d);
+  });
+
+  /* 3 · emparejar */
+  const PAIRS=[["3 km","3000 m"],["2,5 L","2500 mL"],["450 g","0,45 kg"],["8 cm","0,08 m"]];
+  const box=$("#match"),mfb=$("#match-fb");
+  const L=document.createElement("div"),R=document.createElement("div");L.className="col";R.className="col";
+  const rights=PAIRS.map((p,i)=>({t:p[1],i})).sort(()=>Math.random()-0.5);
+  let sel=null,done=0;
+  function pick(b){
+    if(b.classList.contains("done"))return;
+    if(!sel){sel=b;b.classList.add("sel");return;}
+    if(sel===b){b.classList.remove("sel");sel=null;return;}
+    if(sel.dataset.side===b.dataset.side){sel.classList.remove("sel");sel=b;b.classList.add("sel");return;}
+    if(sel.dataset.i===b.dataset.i){sel.classList.add("done");b.classList.add("done");sel.classList.remove("sel");sel=null;done++;
+      if(done===PAIRS.length){mfb.className="fb ok";mfb.textContent="¡Todas emparejadas! 🎉";sumar("match");}}
+    else{const a=sel;a.classList.add("bad");b.classList.add("bad");setTimeout(()=>{a.classList.remove("bad","sel");b.classList.remove("bad");},500);sel=null;mfb.className="fb bad";mfb.textContent="Esas dos no son iguales. Prueba otra vez.";}
+  }
+  PAIRS.forEach((p,i)=>{const b=document.createElement("button");b.className="btn alt";b.textContent=p[0];b.dataset.i=i;b.dataset.side="L";b.onclick=()=>pick(b);L.appendChild(b);});
+  rights.forEach(r=>{const b=document.createElement("button");b.className="btn alt";b.textContent=r.t;b.dataset.i=r.i;b.dataset.side="R";b.onclick=()=>pick(b);R.appendChild(b);});
+  box.appendChild(L);box.appendChild(R);
+})();
+</script>
+</body>
+</html>
