@@ -19,3 +19,9 @@ Es una página única (`index.html`). Publicada con **GitHub Pages**:
 - Notación científica · Cifras significativas *(3º/4º)*
 - Construcción de gráficas
 - Actividades interactivas y gimnasio de conversiones
+
+## Estudia+ (planificador de estudio)
+
+👉 https://ccalmar2201-maker.github.io/calero-aula-fisica/estudia-plus/
+
+Código en `estudia-plus/src`; `estudia-plus/build.sh` genera `index.html`.
